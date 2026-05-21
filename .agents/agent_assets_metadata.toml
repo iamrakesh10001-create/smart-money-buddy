@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "22UzhZS0-qks0C3bj0azi"
+uri = "file://artifacts/mobile/assets/images/icon.png"
+type = "image"
+title = "smart money buddy app icon"
+
+[[generated]]
+id = "m7wyResxZMxbsKsxkFoXX"
+uri = "file://artifacts/mobile/assets/images/splash.png"
+type = "image"
+title = "smart money buddy splash"

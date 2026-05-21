@@ -1,0 +1,621 @@
+You are a senior staff-level mobile engineering team.
+
+Build a COMPLETE production-grade mobile application called:
+
+Smart Money Buddy
+
+This is NOT a prototype.
+This is NOT an MVP demo.
+This must be architected for real Google Play Store and Apple App Store deployment.
+
+The app is an India-focused AI-powered personal finance companion for Gen Z users.
+
+====================================================
+CORE PRODUCT VISION
+====================================================
+
+Tagline:
+“Track money like chatting. Save money without budgeting stress.”
+
+The product combines:
+- Chat-based expense tracking
+- AI money coaching
+- Savings goals
+- Spending insights
+- Gamification
+- Smart notifications
+
+The UX should feel:
+- fast
+- lightweight
+- dopamine-friendly
+- Gen-Z modern
+- emotionally positive
+- non-judgmental
+
+Avoid:
+- corporate banking aesthetics
+- spreadsheet-like UI
+- cluttered dashboards
+- excessive finance jargon
+
+====================================================
+PRIMARY USER PERSONAS
+====================================================
+
+1. First Salary Earner
+Age: 22–28
+Pain:
+- Salary disappears quickly
+- No budgeting habit
+- Wants savings discipline
+
+2. College Student
+Age: 18–24
+Pain:
+- Limited allowance
+- Impulse spending
+- Wants better control
+
+3. Young Professional
+Age: 24–35
+Pain:
+- EMI + rent + food costs
+- Wants financial planning
+
+====================================================
+MANDATORY TECH STACK
+====================================================
+
+Mobile:
+- React Native
+- Expo SDK latest stable
+- TypeScript
+- Expo Router
+- NativeWind
+- React Query
+- Zustand
+- Reanimated
+- React Native Gesture Handler
+- FlashList for performance
+- React Hook Form
+- Zod validation
+
+Backend:
+- Supabase
+- PostgreSQL
+- Row Level Security
+- Edge Functions
+- Realtime subscriptions
+
+AI:
+- OpenAI API
+- Structured JSON responses
+- Strict schema validation
+- AI retry fallback
+
+Payments:
+- Razorpay subscriptions
+
+Analytics:
+- PostHog
+
+Crash Monitoring:
+- Sentry
+
+Push Notifications:
+- Expo Notifications
+
+Charts:
+- Victory Native or React Native Skia charts
+
+====================================================
+NON-NEGOTIABLE ENGINEERING REQUIREMENTS
+====================================================
+
+The generated app MUST:
+- be production-ready
+- support Android and iOS
+- use scalable architecture
+- avoid placeholder logic
+- avoid mock APIs
+- avoid fake authentication
+- avoid demo-only code
+- avoid inline styles everywhere
+- avoid massive component files
+- avoid unnecessary re-renders
+- support future scaling
+
+Performance Targets:
+- App startup under 2.5s
+- Smooth 60fps animations
+- Optimized list rendering
+- Minimal bundle size
+- Lazy loading where possible
+
+Code Quality:
+- Strict TypeScript
+- Modular folder structure
+- Reusable components
+- Clean architecture
+- Feature-based structure
+- Proper error boundaries
+- Retry handling
+- Offline handling
+
+Security:
+- Secure token handling
+- Environment variable separation
+- Row Level Security
+- JWT auth
+- Secure API calls
+- Rate limiting
+- Input sanitization
+- Validation everywhere
+
+====================================================
+APP NAVIGATION
+====================================================
+
+Bottom Tabs:
+- Home
+- Chat
+- Goals
+- Insights
+- Profile
+
+Use Expo Router properly.
+
+====================================================
+AUTHENTICATION
+====================================================
+
+Implement:
+- Email/password auth
+- Google login
+- Session persistence
+- Auto-login
+- Logout
+- Password reset
+- Email verification
+
+====================================================
+ONBOARDING FLOW
+====================================================
+
+Collect:
+- Name
+- Monthly income
+- Salary date
+- Biggest spending category
+- Monthly savings target
+- Primary financial goal
+
+Persist onboarding state properly.
+
+====================================================
+HOME SCREEN
+====================================================
+
+Sections:
+- Greeting
+- Money score ring
+- Total monthly spending
+- Salary remaining estimate
+- Savings this month
+- Goal progress
+- Spending trend chart
+- AI daily insight
+- Quick add expense buttons
+
+Cards:
+- Food spending
+- Biggest category
+- Weekly comparison
+- Spending health
+
+====================================================
+CHAT SCREEN
+====================================================
+
+MOST IMPORTANT FEATURE.
+
+WhatsApp-like expense logging UX.
+
+Examples:
+- “Tea 20”
+- “Uber 150”
+- “Salary 45000”
+- “Swiggy 320”
+
+AI parser must extract:
+- amount
+- merchant
+- category
+- timestamp
+- transaction type
+
+Supported categories:
+- Food
+- Shopping
+- Rent
+- Travel
+- Entertainment
+- Bills
+- Healthcare
+- Fuel
+- EMI
+- Salary
+
+Must support:
+- optimistic UI
+- instant feedback
+- typing animations
+- chat bubbles
+- quick suggestion chips
+- voice input placeholder architecture
+- retry if parsing fails
+
+Example response:
+“Added ₹150 to Travel 🚖”
+
+====================================================
+GOALS SCREEN
+====================================================
+
+Features:
+- Create savings goals
+- Goal deadline
+- Goal priority
+- Progress tracking
+- AI goal acceleration suggestions
+
+Visuals:
+- Progress rings
+- Progress bars
+- Goal ETA
+
+Example:
+MacBook Goal
+₹25,000 / ₹80,000
+
+AI Example:
+“You can achieve this 38 days faster.”
+
+====================================================
+INSIGHTS SCREEN
+====================================================
+
+Features:
+- Weekly summary
+- Monthly summary
+- Top spending category
+- Trend analysis
+- Savings estimation
+- Spending behavior analysis
+
+Examples:
+“You spent 26% more on food this month.”
+
+Add:
+- charts
+- category breakdowns
+- comparison analytics
+
+====================================================
+PROFILE SCREEN
+====================================================
+
+Features:
+- Theme toggle
+- Notification settings
+- Subscription management
+- Export data
+- Privacy controls
+- Account management
+- Delete account flow
+
+====================================================
+GAMIFICATION SYSTEM
+====================================================
+
+Money Score:
+Range:
+0–100
+
+Factors:
+- Savings rate
+- Spending consistency
+- Goal progress
+- Budget discipline
+
+Badges:
+- 7 Day Saver
+- Budget Master
+- No Overspending
+
+Streak System:
+- Daily logging streaks
+
+====================================================
+NOTIFICATION SYSTEM
+====================================================
+
+Triggers:
+- No logging for 24h
+- Salary day reminder
+- Overspending alerts
+- Goal milestones
+- Weekly insights
+
+Examples:
+“Still tracking today? 👀”
+“You crossed your food budget 🍔”
+
+====================================================
+AI SYSTEM
+====================================================
+
+Use OpenAI structured outputs.
+
+Expense Parser Prompt:
+Convert user expense message into JSON.
+Detect:
+- merchant
+- amount
+- category
+- type
+Return JSON only.
+
+Money Coach Prompt:
+Analyze spending behavior.
+Generate concise Gen-Z-friendly advice.
+Never shame user.
+Keep under 40 words.
+
+AI Requirements:
+- caching
+- retries
+- timeout handling
+- schema validation
+- hallucination protection
+- token optimization
+- low-cost inference strategy
+
+====================================================
+DATABASE DESIGN
+====================================================
+
+Create FULL PostgreSQL schema.
+
+Tables:
+- users
+- onboarding_profiles
+- expenses
+- categories
+- goals
+- goal_contributions
+- insights
+- notifications
+- streaks
+- subscriptions
+- achievements
+- money_scores
+- user_settings
+- referrals
+
+Include:
+- indexes
+- timestamps
+- foreign keys
+- cascading rules
+- optimized queries
+
+Enable:
+- Row Level Security
+- secure policies
+
+====================================================
+STATE MANAGEMENT
+====================================================
+
+Use Zustand stores:
+- AuthStore
+- ExpenseStore
+- GoalStore
+- DashboardStore
+- NotificationStore
+- SubscriptionStore
+
+Use React Query for:
+- server state
+- caching
+- mutations
+- optimistic updates
+
+====================================================
+FOLDER STRUCTURE
+====================================================
+
+src/
+  app/
+  components/
+  features/
+    auth/
+    onboarding/
+    chat/
+    dashboard/
+    goals/
+    insights/
+    profile/
+    notifications/
+    subscriptions/
+  hooks/
+  services/
+  store/
+  lib/
+  constants/
+  types/
+  utils/
+  theme/
+
+====================================================
+DESIGN SYSTEM
+====================================================
+
+Style:
+- modern fintech
+- Gen-Z aesthetics
+- premium minimalism
+
+Requirements:
+- dark/light theme
+- 24px rounded corners
+- smooth micro interactions
+- glassmorphism accents
+- soft shadows
+- clean typography
+- responsive layouts
+
+Animations:
+- smooth transitions
+- gesture-based interactions
+- subtle haptics
+
+Avoid:
+- clutter
+- excessive gradients
+- outdated fintech UI
+
+====================================================
+ANALYTICS
+====================================================
+
+Track:
+- DAU
+- retention
+- onboarding completion
+- subscription conversion
+- churn
+- average logs per day
+- feature usage
+
+Use PostHog event naming conventions.
+
+====================================================
+SUBSCRIPTION SYSTEM
+====================================================
+
+Use Razorpay.
+
+Premium Features:
+- advanced AI insights
+- unlimited goals
+- premium themes
+- advanced analytics
+
+Implement:
+- entitlement checks
+- subscription restore
+- premium gating
+- server validation
+
+====================================================
+EXPORT SYSTEM
+====================================================
+
+Allow export:
+- CSV
+- JSON
+
+====================================================
+OFFLINE SUPPORT
+====================================================
+
+App must support:
+- offline expense logging
+- local queue sync
+- optimistic updates
+- retry synchronization
+
+====================================================
+TESTING
+====================================================
+
+Implement:
+- unit testing
+- component testing
+- API validation testing
+
+====================================================
+DEVOPS
+====================================================
+
+Setup:
+- EAS build configuration
+- environment configs
+- production builds
+- staging environment
+- CI/CD-ready architecture
+
+====================================================
+LEGAL + COMPLIANCE
+====================================================
+
+Include:
+- Privacy policy screen
+- Terms screen
+- Data deletion flow
+- Consent management
+
+====================================================
+DELIVERABLES
+====================================================
+
+Generate:
+1. Complete frontend
+2. Complete backend integration
+3. Supabase schema
+4. RLS policies
+5. Environment config examples
+6. AI service layer
+7. Navigation setup
+8. Zustand stores
+9. React Query hooks
+10. Production folder structure
+11. Reusable UI system
+12. Theme system
+13. Notification service
+14. Analytics integration
+15. Razorpay integration
+16. Complete TypeScript types
+17. Build instructions
+18. Deployment instructions
+19. App Store readiness checklist
+20. Google Play readiness checklist
+
+====================================================
+IMPORTANT RULES
+====================================================
+
+DO NOT:
+- generate fake placeholder logic
+- skip backend implementation
+- simplify architecture
+- generate toy-level UI
+- use poor TypeScript practices
+- create monolithic files
+- hardcode secrets
+- ignore offline handling
+- ignore performance
+
+DO:
+- generate scalable production architecture
+- use real-world engineering standards
+- create polished UI
+- use reusable components
+- prioritize performance
+- prioritize clean UX
+- optimize for future scaling
+
+Build this as if a funded startup is preparing for launch.
