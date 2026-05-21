@@ -9,6 +9,7 @@ interface GoalContextType {
   updateGoal: (id: string, updates: Partial<Goal>) => Promise<void>;
   deleteGoal: (id: string) => Promise<void>;
   addContribution: (id: string, amount: number) => Promise<void>;
+  deductContribution: (id: string, amount: number) => Promise<void>;
 }
 
 const GoalContext = createContext<GoalContextType | null>(null);
@@ -23,11 +24,6 @@ export function GoalProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
   }, []);
-
-  const saveGoals = (updated: Goal[]) => {
-    setGoals(updated);
-    Storage.setGoals(updated);
-  };
 
   const addGoal = useCallback(async (goal: Goal) => {
     setGoals(prev => {
@@ -65,8 +61,20 @@ export function GoalProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const deductContribution = useCallback(async (id: string, amount: number) => {
+    setGoals(prev => {
+      const updated = prev.map(g =>
+        g.id === id
+          ? { ...g, currentAmount: Math.max(0, g.currentAmount - amount) }
+          : g
+      );
+      Storage.setGoals(updated);
+      return updated;
+    });
+  }, []);
+
   return (
-    <GoalContext.Provider value={{ goals, isLoading, addGoal, updateGoal, deleteGoal, addContribution }}>
+    <GoalContext.Provider value={{ goals, isLoading, addGoal, updateGoal, deleteGoal, addContribution, deductContribution }}>
       {children}
     </GoalContext.Provider>
   );

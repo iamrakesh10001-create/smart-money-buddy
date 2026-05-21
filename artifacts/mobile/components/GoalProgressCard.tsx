@@ -8,10 +8,11 @@ import { formatCurrencyFull } from '@/utils/format';
 interface Props {
   goal: Goal;
   onContribute?: (id: string) => void;
+  onDeduct?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
 
-export function GoalProgressCard({ goal, onContribute, onDelete }: Props) {
+export function GoalProgressCard({ goal, onContribute, onDeduct, onDelete }: Props) {
   const colors = useColors();
   const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
   const remaining = goal.targetAmount - goal.currentAmount;
@@ -24,12 +25,7 @@ export function GoalProgressCard({ goal, onContribute, onDelete }: Props) {
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: colors.card, borderRadius: colors.radius },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.card, borderRadius: colors.radius }]}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
           <Text style={styles.icon}>{goal.icon}</Text>
@@ -39,12 +35,12 @@ export function GoalProgressCard({ goal, onContribute, onDelete }: Props) {
             </Text>
             {daysLeft !== null && (
               <Text style={[styles.deadline, { color: colors.mutedForeground }]}>
-                {isComplete ? 'Goal reached!' : `${daysLeft}d remaining`}
+                {isComplete ? 'Goal reached! 🎉' : `${daysLeft}d remaining`}
               </Text>
             )}
           </View>
           {isComplete && <Feather name="check-circle" size={20} color={colors.success} />}
-          {onDelete && !isComplete && (
+          {onDelete && (
             <TouchableOpacity onPress={() => onDelete(goal.id)} hitSlop={8}>
               <Feather name="trash-2" size={16} color={colors.mutedForeground} />
             </TouchableOpacity>
@@ -77,19 +73,26 @@ export function GoalProgressCard({ goal, onContribute, onDelete }: Props) {
           {Math.round(progress)}% saved
         </Text>
         {!isComplete && (
-          <>
-            <Text style={[styles.remaining, { color: colors.mutedForeground }]} numberOfLines={1}>
-              {formatCurrencyFull(remaining)} to go
-            </Text>
-            {onContribute && (
-              <TouchableOpacity
-                style={[styles.addBtn, { backgroundColor: goal.color }]}
-                onPress={() => onContribute(goal.id)}
-              >
-                <Text style={styles.addBtnText}>+ Add</Text>
-              </TouchableOpacity>
-            )}
-          </>
+          <Text style={[styles.remaining, { color: colors.mutedForeground }]} numberOfLines={1}>
+            {formatCurrencyFull(remaining)} to go
+          </Text>
+        )}
+        {!isComplete && onDeduct && goal.currentAmount > 0 && (
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: colors.border }]}
+            onPress={() => onDeduct(goal.id)}
+          >
+            <Feather name="minus" size={13} color={colors.mutedForeground} />
+          </TouchableOpacity>
+        )}
+        {!isComplete && onContribute && (
+          <TouchableOpacity
+            style={[styles.actionBtn, { backgroundColor: goal.color }]}
+            onPress={() => onContribute(goal.id)}
+          >
+            <Feather name="plus" size={13} color="#fff" />
+            <Text style={styles.actionBtnText}>Add</Text>
+          </TouchableOpacity>
         )}
       </View>
     </View>
@@ -100,11 +103,7 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowRadius: 8, shadowOffset: { width: 0, height: 2 }, elevation: 2,
   },
   header: { marginBottom: 12 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
@@ -119,6 +118,6 @@ const styles = StyleSheet.create({
   footer: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   percent: { fontSize: 13, fontWeight: '700' },
   remaining: { flex: 1, fontSize: 12, textAlign: 'right' },
-  addBtn: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20 },
-  addBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
+  actionBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 },
+  actionBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 });

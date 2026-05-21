@@ -1,15 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  Modal,
-  TextInput,
-  Platform,
-  Alert,
-  KeyboardAvoidingView,
+  View, Text, ScrollView, StyleSheet, TouchableOpacity,
+  Modal, TextInput, Platform, Alert, KeyboardAvoidingView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Feather } from '@expo/vector-icons';
@@ -22,80 +14,62 @@ import { generateId } from '@/utils/format';
 import { GOAL_ICONS, GOAL_COLORS } from '@/utils/categories';
 
 interface NewGoalForm {
-  name: string;
-  targetAmount: string;
-  deadline: string;
-  icon: string;
-  color: string;
+  name: string; targetAmount: string; deadline: string; icon: string; color: string;
 }
+const DEFAULT_FORM: NewGoalForm = { name: '', targetAmount: '', deadline: '', icon: '🎯', color: '#6C47FF' };
 
-const DEFAULT_FORM: NewGoalForm = {
-  name: '',
-  targetAmount: '',
-  deadline: '',
-  icon: '🎯',
-  color: '#6C47FF',
-};
+type ModalMode = 'add' | 'contribute' | 'deduct';
 
 export default function GoalsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { goals, addGoal, deleteGoal, addContribution, isLoading } = useGoals();
+  const { goals, addGoal, deleteGoal, addContribution, deductContribution, isLoading } = useGoals();
 
   const [showAdd, setShowAdd] = useState(false);
   const [form, setForm] = useState<NewGoalForm>(DEFAULT_FORM);
-  const [contribGoalId, setContribGoalId] = useState<string | null>(null);
-  const [contribAmount, setContribAmount] = useState('');
+  const [modalMode, setModalMode] = useState<ModalMode>('contribute');
+  const [activeGoalId, setActiveGoalId] = useState<string | null>(null);
+  const [amountInput, setAmountInput] = useState('');
 
   const TAB_BAR_HEIGHT = Platform.OS === 'web' ? 84 : 80;
   const topPad = insets.top + (Platform.OS === 'web' ? 67 : 0);
 
+  const haptic = () => { if (Platform.OS !== 'web') Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); };
+
   const handleAddGoal = async () => {
     if (!form.name.trim() || !form.targetAmount) return;
     const goal: Goal = {
-      id: generateId(),
-      name: form.name.trim(),
+      id: generateId(), name: form.name.trim(),
       targetAmount: parseFloat(form.targetAmount.replace(/,/g, '')) || 0,
-      currentAmount: 0,
-      deadline: form.deadline || undefined,
-      icon: form.icon,
-      color: form.color,
-      createdAt: new Date().toISOString(),
+      currentAmount: 0, deadline: form.deadline || undefined,
+      icon: form.icon, color: form.color, createdAt: new Date().toISOString(),
     };
     await addGoal(goal);
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
+    haptic();
     setForm(DEFAULT_FORM);
     setShowAdd(false);
   };
 
-  const handleDeleteGoal = (id: string) => {
-    if (Platform.OS === 'web') {
-      deleteGoal(id);
-      return;
-    }
+  const handleDelete = (id: string) => {
+    if (Platform.OS === 'web') { deleteGoal(id); return; }
     Alert.alert('Delete Goal', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => deleteGoal(id) },
     ]);
   };
 
-  const handleContribute = (id: string) => {
-    setContribGoalId(id);
-    setContribAmount('');
-  };
+  const openContribute = (id: string) => { setActiveGoalId(id); setModalMode('contribute'); setAmountInput(''); };
+  const openDeduct = (id: string) => { setActiveGoalId(id); setModalMode('deduct'); setAmountInput(''); };
 
-  const submitContribution = async () => {
-    if (!contribGoalId) return;
-    const amount = parseFloat(contribAmount.replace(/,/g, ''));
+  const submitAmount = async () => {
+    if (!activeGoalId) return;
+    const amount = parseFloat(amountInput.replace(/,/g, ''));
     if (isNaN(amount) || amount <= 0) return;
-    await addContribution(contribGoalId, amount);
-    if (Platform.OS !== 'web') {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    }
-    setContribGoalId(null);
-    setContribAmount('');
+    if (modalMode === 'contribute') await addContribution(activeGoalId, amount);
+    else await deductContribution(activeGoalId, amount);
+    haptic();
+    setActiveGoalId(null);
+    setAmountInput('');
   };
 
   const completedGoals = goals.filter(g => g.currentAmount >= g.targetAmount);
@@ -103,7 +77,6 @@ export default function GoalsScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <View style={[styles.header, { paddingTop: topPad + 12, backgroundColor: colors.background }]}>
         <View>
           <Text style={[styles.title, { color: colors.foreground }]}>Savings Goals</Text>
@@ -145,10 +118,10 @@ export default function GoalsScreen() {
                 <Text style={[styles.groupLabel, { color: colors.mutedForeground }]}>ACTIVE</Text>
                 {activeGoals.map(goal => (
                   <GoalProgressCard
-                    key={goal.id}
-                    goal={goal}
-                    onContribute={handleContribute}
-                    onDelete={handleDeleteGoal}
+                    key={goal.id} goal={goal}
+                    onContribute={openContribute}
+                    onDeduct={openDeduct}
+                    onDelete={handleDelete}
                   />
                 ))}
               </>
@@ -157,11 +130,7 @@ export default function GoalsScreen() {
               <>
                 <Text style={[styles.groupLabel, { color: colors.mutedForeground }]}>COMPLETED</Text>
                 {completedGoals.map(goal => (
-                  <GoalProgressCard
-                    key={goal.id}
-                    goal={goal}
-                    onDelete={handleDeleteGoal}
-                  />
+                  <GoalProgressCard key={goal.id} goal={goal} onDelete={handleDelete} />
                 ))}
               </>
             )}
@@ -171,10 +140,7 @@ export default function GoalsScreen() {
 
       {/* Add Goal Modal */}
       <Modal visible={showAdd} animationType="slide" presentationStyle="pageSheet">
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View style={[styles.modal, { backgroundColor: colors.background }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.foreground }]}>New Goal</Text>
@@ -182,90 +148,55 @@ export default function GoalsScreen() {
                 <Feather name="x" size={22} color={colors.foreground} />
               </TouchableOpacity>
             </View>
-
             <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>GOAL NAME</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.card, color: colors.foreground, borderColor: colors.border, borderRadius: colors.radius }]}
-                placeholder="e.g. MacBook, Emergency Fund..."
-                placeholderTextColor={colors.mutedForeground}
-                value={form.name}
-                onChangeText={v => setForm(f => ({ ...f, name: v }))}
+                placeholder="e.g. MacBook, Emergency Fund..." placeholderTextColor={colors.mutedForeground}
+                value={form.name} onChangeText={v => setForm(f => ({ ...f, name: v }))}
               />
-
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>TARGET AMOUNT</Text>
               <View style={[styles.amountInput, { backgroundColor: colors.card, borderColor: colors.border, borderRadius: colors.radius }]}>
                 <Text style={[styles.rupee, { color: colors.primary }]}>₹</Text>
                 <TextInput
                   style={[styles.amountText, { color: colors.foreground }]}
-                  placeholder="80,000"
-                  placeholderTextColor={colors.mutedForeground}
-                  keyboardType="numeric"
-                  value={form.targetAmount}
+                  placeholder="80,000" placeholderTextColor={colors.mutedForeground}
+                  keyboardType="numeric" value={form.targetAmount}
                   onChangeText={v => setForm(f => ({ ...f, targetAmount: v }))}
                 />
               </View>
-
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>DEADLINE (optional)</Text>
               <TextInput
                 style={[styles.input, { backgroundColor: colors.card, color: colors.foreground, borderColor: colors.border, borderRadius: colors.radius }]}
-                placeholder="YYYY-MM-DD"
-                placeholderTextColor={colors.mutedForeground}
-                value={form.deadline}
-                onChangeText={v => setForm(f => ({ ...f, deadline: v }))}
+                placeholder="YYYY-MM-DD" placeholderTextColor={colors.mutedForeground}
+                value={form.deadline} onChangeText={v => setForm(f => ({ ...f, deadline: v }))}
               />
-
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>ICON</Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
                 <View style={styles.iconRow}>
                   {GOAL_ICONS.map(ic => (
-                    <TouchableOpacity
-                      key={ic}
-                      style={[
-                        styles.iconChip,
-                        {
-                          backgroundColor: form.icon === ic ? colors.primary + '20' : colors.card,
-                          borderColor: form.icon === ic ? colors.primary : colors.border,
-                          borderRadius: 12,
-                        },
-                      ]}
-                      onPress={() => setForm(f => ({ ...f, icon: ic }))}
-                    >
+                    <TouchableOpacity key={ic}
+                      style={[styles.iconChip, { backgroundColor: form.icon === ic ? colors.primary + '20' : colors.card, borderColor: form.icon === ic ? colors.primary : colors.border, borderRadius: 12 }]}
+                      onPress={() => setForm(f => ({ ...f, icon: ic }))}>
                       <Text style={{ fontSize: 22 }}>{ic}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
               </ScrollView>
-
               <Text style={[styles.fieldLabel, { color: colors.mutedForeground }]}>COLOR</Text>
               <View style={styles.colorRow}>
                 {GOAL_COLORS.map(c => (
-                  <TouchableOpacity
-                    key={c}
-                    style={[
-                      styles.colorDot,
-                      { backgroundColor: c },
-                      form.color === c && styles.colorSelected,
-                    ]}
-                    onPress={() => setForm(f => ({ ...f, color: c }))}
-                  >
+                  <TouchableOpacity key={c}
+                    style={[styles.colorDot, { backgroundColor: c }, form.color === c && styles.colorSelected]}
+                    onPress={() => setForm(f => ({ ...f, color: c }))}>
                     {form.color === c && <Feather name="check" size={14} color="#fff" />}
                   </TouchableOpacity>
                 ))}
               </View>
             </ScrollView>
-
             <TouchableOpacity
-              style={[
-                styles.createBtn,
-                {
-                  backgroundColor: form.name.trim() && form.targetAmount ? colors.primary : colors.muted,
-                  borderRadius: colors.radius,
-                },
-              ]}
-              onPress={handleAddGoal}
-              disabled={!form.name.trim() || !form.targetAmount}
-            >
+              style={[styles.createBtn, { backgroundColor: form.name.trim() && form.targetAmount ? colors.primary : colors.muted, borderRadius: colors.radius }]}
+              onPress={handleAddGoal} disabled={!form.name.trim() || !form.targetAmount}>
               <Text style={[styles.createBtnText, { color: form.name.trim() && form.targetAmount ? '#fff' : colors.mutedForeground }]}>
                 Create Goal
               </Text>
@@ -274,36 +205,38 @@ export default function GoalsScreen() {
         </KeyboardAvoidingView>
       </Modal>
 
-      {/* Contribute Modal */}
-      <Modal visible={!!contribGoalId} animationType="fade" transparent>
+      {/* Add / Deduct Amount Modal */}
+      <Modal visible={!!activeGoalId} animationType="fade" transparent>
         <View style={styles.overlay}>
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
             <View style={[styles.contribCard, { backgroundColor: colors.card, borderRadius: colors.radius }]}>
-              <Text style={[styles.contribTitle, { color: colors.foreground }]}>Add Contribution</Text>
+              <Text style={[styles.contribTitle, { color: colors.foreground }]}>
+                {modalMode === 'contribute' ? '➕ Add Money' : '➖ Withdraw Money'}
+              </Text>
+              <Text style={[styles.contribSub, { color: colors.mutedForeground }]}>
+                {modalMode === 'contribute' ? 'How much are you adding to this goal?' : 'How much do you want to withdraw?'}
+              </Text>
               <View style={[styles.amountInput, { backgroundColor: colors.background, borderColor: colors.border, borderRadius: 12 }]}>
                 <Text style={[styles.rupee, { color: colors.primary }]}>₹</Text>
                 <TextInput
                   style={[styles.amountText, { color: colors.foreground }]}
-                  placeholder="1,000"
-                  placeholderTextColor={colors.mutedForeground}
-                  keyboardType="numeric"
-                  value={contribAmount}
-                  onChangeText={setContribAmount}
-                  autoFocus
+                  placeholder="1,000" placeholderTextColor={colors.mutedForeground}
+                  keyboardType="numeric" value={amountInput}
+                  onChangeText={setAmountInput} autoFocus
                 />
               </View>
               <View style={styles.contribBtns}>
                 <TouchableOpacity
                   style={[styles.contribCancel, { borderColor: colors.border, borderRadius: 12 }]}
-                  onPress={() => setContribGoalId(null)}
-                >
+                  onPress={() => setActiveGoalId(null)}>
                   <Text style={[styles.contribCancelText, { color: colors.foreground }]}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.contribAdd, { backgroundColor: colors.primary, borderRadius: 12 }]}
-                  onPress={submitContribution}
-                >
-                  <Text style={styles.contribAddText}>Add</Text>
+                  style={[styles.contribAdd, { backgroundColor: modalMode === 'contribute' ? colors.primary : colors.destructive, borderRadius: 12 }]}
+                  onPress={submitAmount}>
+                  <Text style={styles.contribAddText}>
+                    {modalMode === 'contribute' ? 'Add' : 'Withdraw'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -316,11 +249,7 @@ export default function GoalsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  header: {
-    flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between',
-    paddingHorizontal: 20, paddingBottom: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: 'transparent',
-  },
+  header: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', paddingHorizontal: 20, paddingBottom: 14 },
   title: { fontSize: 24, fontWeight: '800' },
   sub: { fontSize: 13, marginTop: 2 },
   addBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 8 },
@@ -347,8 +276,9 @@ const styles = StyleSheet.create({
   createBtn: { height: 52, alignItems: 'center', justifyContent: 'center', marginTop: 8 },
   createBtnText: { fontSize: 16, fontWeight: '700' },
   overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 24 },
-  contribCard: { padding: 20, gap: 16 },
+  contribCard: { padding: 20, gap: 14 },
   contribTitle: { fontSize: 18, fontWeight: '700' },
+  contribSub: { fontSize: 13, marginTop: -6 },
   contribBtns: { flexDirection: 'row', gap: 10 },
   contribCancel: { flex: 1, height: 44, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
   contribCancelText: { fontSize: 15, fontWeight: '600' },

@@ -11,6 +11,14 @@ export type Category =
   | 'Fuel'
   | 'EMI'
   | 'Salary'
+  | 'Education'
+  | 'Subscriptions'
+  | 'Personal Care'
+  | 'Investments'
+  | 'Gifts'
+  | 'Alcohol'
+  | 'Kids'
+  | 'Pets'
   | 'Other';
 
 export interface Expense {
@@ -51,3 +59,5 @@ export interface ChatMessage {
   expense?: Expense;
   createdAt: string;
 }
+
+export type ThemePreference = 'light' | 'dark' | 'system';

@@ -17,6 +17,8 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ExpenseProvider } from "@/contexts/ExpenseContext";
 import { GoalProvider } from "@/contexts/GoalContext";
+import { ThemeProvider } from "@/contexts/ThemeContext";
+import { setupNotificationHandler } from "@/utils/notifications";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -42,6 +44,10 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    setupNotificationHandler();
+  }, []);
+
+  useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync();
     }
@@ -52,19 +58,21 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <ErrorBoundary>
-        <AuthProvider>
-          <ExpenseProvider>
-            <GoalProvider>
-              <QueryClientProvider client={queryClient}>
-                <GestureHandlerRootView style={{ flex: 1 }}>
-                  <KeyboardProvider>
-                    <RootLayoutNav />
-                  </KeyboardProvider>
-                </GestureHandlerRootView>
-              </QueryClientProvider>
-            </GoalProvider>
-          </ExpenseProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <ExpenseProvider>
+              <GoalProvider>
+                <QueryClientProvider client={queryClient}>
+                  <GestureHandlerRootView style={{ flex: 1 }}>
+                    <KeyboardProvider>
+                      <RootLayoutNav />
+                    </KeyboardProvider>
+                  </GestureHandlerRootView>
+                </QueryClientProvider>
+              </GoalProvider>
+            </ExpenseProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </ErrorBoundary>
     </SafeAreaProvider>
   );
